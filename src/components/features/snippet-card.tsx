@@ -113,8 +113,14 @@ const SnippetCard = ({
         >
           <div className="w-full pr-8">
             {snippet.description && (
-              <CardTitle className="text-sm font-semibold line-clamp-2">
-                {snippet.description}
+              <CardTitle className="text-sm font-semibold">
+                <span className="sm:hidden">
+                  {snippet.description.split(" ").slice(0, 8).join(" ")}
+                  {snippet.description.split(" ").length > 8 ? "..." : ""}
+                </span>
+                <span className="hidden sm:inline line-clamp-2">
+                  {snippet.description}
+                </span>
               </CardTitle>
             )}
           </div>
@@ -205,18 +211,20 @@ const SnippetCard = ({
         </CardContent>
 
         <CardFooter className="border-t flex items-center justify-between py-2">
-          <div className="flex gap-1.5 flex-wrap justify-end">
-            {snippet.tags?.map((tag) => (
+          <div className="flex gap-1.5 flex-wrap justify-start sm:justify-end">
+            {snippet.tags?.map((tag, index) => (
               <Badge
                 key={tag}
                 variant="outline"
-                className="text-[10px] text-muted-foreground border-border/50"
+                className={`text-[10px] text-muted-foreground border-border/50 ${
+                  index >= 2 ? "hidden sm:inline-flex" : ""
+                }`}
               >
                 {tag}
               </Badge>
             ))}
           </div>
-          <div className="flex items-center gap-1.5 flex-row">
+          <div className="flex items-center gap-1.5 flex-row text-xs shrink-0">
             <Avatar className="size-5">
               <AvatarImage
                 src={snippet.user?.image || undefined}
@@ -226,7 +234,14 @@ const SnippetCard = ({
                 <UserCircleCheckIcon weight="duotone" />
               </AvatarFallback>
             </Avatar>
-            {snippet.user?.name}
+            {snippet.user?.name && (
+              <>
+                <span className="sm:hidden">
+                  {snippet.user.name.split(" ")[0]}
+                </span>
+                <span className="hidden sm:inline">{snippet.user.name}</span>
+              </>
+            )}
           </div>
         </CardFooter>
       </Card>

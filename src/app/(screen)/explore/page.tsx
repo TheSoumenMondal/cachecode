@@ -1,8 +1,13 @@
 import { getPublicSnippets } from "@/app/actions/snippet.actions";
 import SnippetCard from "@/components/features/snippet-card";
 
-const ExplorePage = async () => {
-  const snippets = await getPublicSnippets();
+type Props = {
+  searchParams: Promise<{ tag?: string }>;
+};
+
+const ExplorePage = async ({ searchParams }: Props) => {
+  const { tag } = await searchParams;
+  const snippets = await getPublicSnippets(tag);
 
   return (
     <div className="w-full flex-1 p-2">

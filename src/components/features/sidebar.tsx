@@ -41,7 +41,7 @@ const sidebarItems: sidebarItemType[] = [
 
 const Sidebar = () => {
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col bg-background">
       <div className="w-full flex items-center justify-center h-11 border-b shrink-0">
         <div className="flex gap-1.5 items-center">
           <HandWavingIcon weight="bold" />

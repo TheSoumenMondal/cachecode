@@ -74,9 +74,9 @@ export async function createSnippetAction(
   }
 }
 
-export async function getPublicSnippets() {
+export async function getPublicSnippets(tagFilter?: string) {
   try {
-    const rawData = await db
+    const baseQuery = db
       .select({
         snippet: codeSnippet,
         user: {
@@ -87,8 +87,20 @@ export async function getPublicSnippets() {
       })
       .from(codeSnippet)
       .innerJoin(user, eq(codeSnippet.created_by, user.id))
-      .where(eq(codeSnippet.isPublic, true))
-      .orderBy(desc(codeSnippet.createdAt));
+      .orderBy(desc(codeSnippet.createdAt))
+      .$dynamic();
+
+    const filters = [eq(codeSnippet.isPublic, true)];
+
+    if (tagFilter) {
+      // For PostgreSQL arrays, arrayContains checks if the array contains the given elements
+      // Drizzle provides arrayContains: arrayContains(column, [value])
+      const { arrayContains } = await import("drizzle-orm");
+      filters.push(arrayContains(codeSnippet.tags, [tagFilter]));
+    }
+
+    const { and } = await import("drizzle-orm");
+    const rawData = await baseQuery.where(and(...filters));
 
     return rawData.map(({ snippet, user }) => ({
       ...snippet,
@@ -96,6 +108,46 @@ export async function getPublicSnippets() {
     }));
   } catch (error) {
     console.error("Failed to fetch public snippets:", error);
+    return [];
+  }
+}
+
+export async function getAllTags() {
+  try {
+    const rawData = await db
+      .select({ tags: codeSnippet.tags })
+      .from(codeSnippet)
+      .where(eq(codeSnippet.isPublic, true));
+
+    const tagSet = new Set<string>();
+    rawData.forEach((row) => {
+      row.tags.forEach((tag) => {
+        tagSet.add(tag);
+      });
+    });
+    return Array.from(tagSet).sort();
+  } catch (error) {
+    console.error("Failed to fetch all tags:", error);
+    return [];
+  }
+}
+
+export async function getUserTags(userId: string) {
+  try {
+    const rawData = await db
+      .select({ tags: codeSnippet.tags })
+      .from(codeSnippet)
+      .where(eq(codeSnippet.created_by, userId));
+
+    const tagSet = new Set<string>();
+    rawData.forEach((row) => {
+      row.tags.forEach((tag) => {
+        tagSet.add(tag);
+      });
+    });
+    return Array.from(tagSet).sort();
+  } catch (error) {
+    console.error("Failed to fetch user tags:", error);
     return [];
   }
 }

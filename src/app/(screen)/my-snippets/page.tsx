@@ -1,31 +1,44 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import SnippetCard from "@/components/features/snippet-card";
 import { SnippetCardSkeleton } from "@/components/features/snippet-card-skeleton";
 import type { PopulatedCodeSnippet } from "@/types/snippet";
 
-const MySnippetsPage = () => {
+const MySnippetsContent = () => {
   const [snippets, setSnippets] = useState<PopulatedCodeSnippet[]>([]);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
 
-  const fetchSnippets = useCallback(async (showLoading = true) => {
-    if (showLoading) setLoading(true);
-    try {
-      const res = await fetch("/api/my-snippets");
-      if (!res.ok) {
-        throw new Error("Failed to fetch snippets");
+  const fetchSnippets = useCallback(
+    async (showLoading = true) => {
+      if (showLoading) setLoading(true);
+      try {
+        const tag = searchParams.get("tag");
+        const visibility = searchParams.get("visibility");
+        const params = new URLSearchParams();
+        if (tag) params.set("tag", tag);
+        if (visibility) params.set("visibility", visibility);
+
+        const queryString = params.toString() ? `?${params.toString()}` : "";
+        const res = await fetch(`/api/my-snippets${queryString}`);
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch snippets");
+        }
+        const { data } = await res.json();
+        setSnippets(data);
+      } catch (error) {
+        console.error("Error fetching my snippets:", error);
+        toast.error("Failed to load snippets.");
+      } finally {
+        if (showLoading) setLoading(false);
       }
-      const { data } = await res.json();
-      setSnippets(data);
-    } catch (error) {
-      console.error("Error fetching my snippets:", error);
-      toast.error("Failed to load snippets.");
-    } finally {
-      if (showLoading) setLoading(false);
-    }
-  }, []);
+    },
+    [searchParams],
+  );
 
   useEffect(() => {
     fetchSnippets();
@@ -73,6 +86,24 @@ const MySnippetsPage = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const MySnippetsPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full flex-1 p-2">
+          <div className="grid grid-cols-1 items-start gap-2">
+            {["a", "b", "c"].map((id) => (
+              <SnippetCardSkeleton key={`skeleton-${id}`} />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <MySnippetsContent />
+    </Suspense>
   );
 };
 

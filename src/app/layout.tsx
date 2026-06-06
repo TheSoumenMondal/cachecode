@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { Fira_Code, Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import GlobalProvider from "@/providers/global-provider";
+
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-fira-code",
+});
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -41,10 +47,12 @@ export default function RootLayout({
         geistMono.variable,
         "font-mono",
         jetbrainsMono.variable,
+        firaCode.variable,
       )}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <GlobalProvider>{children}</GlobalProvider>
+        <Toaster richColors closeButton />
       </body>
     </html>
   );

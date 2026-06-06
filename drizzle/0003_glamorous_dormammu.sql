@@ -1,0 +1,2 @@
+ALTER TABLE "code_snippet" ADD COLUMN "created_by" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "code_snippet" ADD CONSTRAINT "code_snippet_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;

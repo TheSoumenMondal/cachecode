@@ -29,11 +29,13 @@ const signupSchema = signupBaseSchema.refine(
   { message: "Passwords do not match.", path: ["confirmPassword"] },
 );
 
-function FieldError({ errors }: { errors: any[] }) {
+function FieldError({ errors }: { errors: unknown[] }) {
   if (!errors.length) return null;
   const error = errors[0];
   const message =
-    typeof error === "string" ? error : error?.message || String(error);
+    typeof error === "string"
+      ? error
+      : (error as { message?: string })?.message || String(error);
   return (
     <p className="text-[11px] text-destructive leading-tight">{message}</p>
   );

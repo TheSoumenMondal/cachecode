@@ -10,9 +10,11 @@ const layout = ({ children }: { children: React.ReactNode }) => {
           <div className="col-span-2 border-r">
             <Sidebar />
           </div>
-          <div className="col-span-8">
+          <div className="col-span-8 flex flex-col h-full overflow-hidden relative">
             <ProtectedNavbar />
-            {children}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              {children}
+            </div>
           </div>
           <div className="col-span-2 border-l">Right</div>
         </div>

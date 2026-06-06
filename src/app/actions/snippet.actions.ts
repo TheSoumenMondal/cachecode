@@ -1,10 +1,11 @@
 "use server";
 
+import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { db } from "@/db/drizzle";
-import { codeSnippet } from "@/db/schema";
+import { codeSnippet, user } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 const createSnippetSchema = z.object({
@@ -70,5 +71,31 @@ export async function createSnippetAction(
     return {
       error: "An unexpected error occurred while creating the snippet.",
     };
+  }
+}
+
+export async function getPublicSnippets() {
+  try {
+    const rawData = await db
+      .select({
+        snippet: codeSnippet,
+        user: {
+          id: user.id,
+          name: user.name,
+          image: user.image,
+        },
+      })
+      .from(codeSnippet)
+      .innerJoin(user, eq(codeSnippet.created_by, user.id))
+      .where(eq(codeSnippet.isPublic, true))
+      .orderBy(desc(codeSnippet.createdAt));
+
+    return rawData.map(({ snippet, user }) => ({
+      ...snippet,
+      user,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch public snippets:", error);
+    return [];
   }
 }

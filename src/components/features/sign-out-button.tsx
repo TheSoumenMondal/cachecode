@@ -29,7 +29,7 @@ export const SignOutButton = () => {
         fetchOptions: {
           onSuccess: () => {
             toast.success("Signed out successfully");
-            router.push("/auth/login");
+            router.push("/login");
           },
         },
       });

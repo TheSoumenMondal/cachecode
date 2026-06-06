@@ -57,7 +57,7 @@ export function ActivityChart({ data }: ActivityChartProps) {
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) => value.slice(0, 6)}
-              style={{ fontSize: "10px", fill: "hsl(var(--muted-foreground))" }}
+              style={{ fontSize: "10px", fill: "var(--muted-foreground)" }}
             />
             <YAxis hide />
             <ChartTooltip

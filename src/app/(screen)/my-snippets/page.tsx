@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import SnippetCard from "@/components/features/snippet-card";
 import { SnippetCardSkeleton } from "@/components/features/snippet-card-skeleton";
@@ -10,25 +10,34 @@ const MySnippetsPage = () => {
   const [snippets, setSnippets] = useState<PopulatedCodeSnippet[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSnippets = async () => {
-      try {
-        const res = await fetch("/api/my-snippets");
-        if (!res.ok) {
-          throw new Error("Failed to fetch snippets");
-        }
-        const { data } = await res.json();
-        setSnippets(data);
-      } catch (error) {
-        console.error("Error fetching my snippets:", error);
-        toast.error("Failed to load snippets.");
-      } finally {
-        setLoading(false);
+  const fetchSnippets = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    try {
+      const res = await fetch("/api/my-snippets");
+      if (!res.ok) {
+        throw new Error("Failed to fetch snippets");
       }
-    };
-
-    fetchSnippets();
+      const { data } = await res.json();
+      setSnippets(data);
+    } catch (error) {
+      console.error("Error fetching my snippets:", error);
+      toast.error("Failed to load snippets.");
+    } finally {
+      if (showLoading) setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchSnippets();
+  }, [fetchSnippets]);
+
+  const handleDeleted = (id: string) => {
+    setSnippets((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleUpdated = () => {
+    fetchSnippets(false); // Refetch silently without loading spinner
+  };
 
   if (loading) {
     return (
@@ -53,7 +62,13 @@ const MySnippetsPage = () => {
       ) : (
         <div className="grid grid-cols-1 items-start gap-2">
           {snippets.map((snippet) => (
-            <SnippetCard key={snippet.id} snippet={snippet} />
+            <SnippetCard
+              key={snippet.id}
+              snippet={snippet}
+              isEditable={true}
+              onDeleted={handleDeleted}
+              onUpdated={handleUpdated}
+            />
           ))}
         </div>
       )}

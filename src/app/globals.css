@@ -128,3 +128,12 @@
     @apply font-mono;
   }
 }
+
+/* Forcefully disable browser focus rings on Recharts SVG paths and containers */
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface * {
+  /* biome-ignore lint/complexity/noImportantStyles: Need to aggressively disable browser focus outlines on SVGs */
+  outline: none !important;
+}

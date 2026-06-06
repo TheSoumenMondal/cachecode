@@ -52,7 +52,7 @@ export default function RootLayout({
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <GlobalProvider>{children}</GlobalProvider>
-        <Toaster richColors closeButton />
+        <Toaster position="bottom-right" duration={3000} />
       </body>
     </html>
   );
